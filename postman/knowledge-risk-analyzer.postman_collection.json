@@ -1,0 +1,966 @@
+{
+  "info": {
+    "name": "Knowledge Risk Analyzer Postman Collection",
+    "description": "Continuous engineering knowledge risk intelligence. Analyzes code \nownership, bus factor, orphaned modules, and onboarding paths to \nidentify where critical knowledge is dangerously concentrated. \nAnswers the questions every CTO fears: \"What happens if this \nengineer leaves?\" and \"Who would fix this at 3 AM?\" Prevents \nsilent organizational fragility from becoming catastrophic outages.\n\nOpenAPI version: 3.0.3",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://knowledgerisk.forgesphere.lightning.com/v1",
+      "type": "string",
+      "description": "Override with the base URL of the deployed Kong gateway."
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "repoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "modulePath",
+      "value": "",
+      "type": "string",
+      "description": "Optional sub-path. If omitted, analyzes entire repo."
+    },
+    {
+      "key": "windowDays",
+      "value": "",
+      "type": "string",
+      "description": "How far back to analyze (days)."
+    },
+    {
+      "key": "minContributionWeight",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "minFileAgeDays",
+      "value": "",
+      "type": "string",
+      "description": "Only include files unchanged for this many days."
+    },
+    {
+      "key": "minFileSizeLines",
+      "value": "",
+      "type": "string",
+      "description": "Ignore trivially small files."
+    },
+    {
+      "key": "ownerStatus",
+      "value": "",
+      "type": "string",
+      "description": "Filter by ownership situation."
+    },
+    {
+      "key": "sort",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "page",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "size",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teamName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "includeRecommendations",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Calculate the bus factor for a module or repository",
+      "request": {
+        "method": "GET",
+        "description": "Calculate the bus factor for a module or repository\n\nResponses:\n- 200: Bus factor analysis.\n- 400: Response\n- 404: Response\n- 500: Response",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/risk/bus-factor?repoId={{repoId}}&modulePath={{modulePath}}&windowDays={{windowDays}}&minContributionWeight={{minContributionWeight}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "risk",
+            "bus-factor"
+          ],
+          "query": [
+            {
+              "key": "repoId",
+              "value": "{{repoId}}",
+              "disabled": false
+            },
+            {
+              "key": "modulePath",
+              "value": "{{modulePath}}",
+              "disabled": true,
+              "description": "Optional sub-path. If omitted, analyzes entire repo."
+            },
+            {
+              "key": "windowDays",
+              "value": "{{windowDays}}",
+              "disabled": true,
+              "description": "How far back to analyze (days)."
+            },
+            {
+              "key": "minContributionWeight",
+              "value": "{{minContributionWeight}}",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "200 Bus factor analysis.",
+          "originalRequest": {
+            "method": "GET",
+            "description": "Calculate the bus factor for a module or repository\n\nResponses:\n- 200: Bus factor analysis.\n- 400: Response\n- 404: Response\n- 500: Response",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/risk/bus-factor?repoId={{repoId}}&modulePath={{modulePath}}&windowDays={{windowDays}}&minContributionWeight={{minContributionWeight}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "bus-factor"
+              ],
+              "query": [
+                {
+                  "key": "repoId",
+                  "value": "{{repoId}}",
+                  "disabled": false
+                },
+                {
+                  "key": "modulePath",
+                  "value": "{{modulePath}}",
+                  "disabled": true,
+                  "description": "Optional sub-path. If omitted, analyzes entire repo."
+                },
+                {
+                  "key": "windowDays",
+                  "value": "{{windowDays}}",
+                  "disabled": true,
+                  "description": "How far back to analyze (days)."
+                },
+                {
+                  "key": "minContributionWeight",
+                  "value": "{{minContributionWeight}}",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "status": "Bus factor analysis.",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        },
+        {
+          "name": "400",
+          "originalRequest": {
+            "method": "GET",
+            "description": "Calculate the bus factor for a module or repository\n\nResponses:\n- 200: Bus factor analysis.\n- 400: Response\n- 404: Response\n- 500: Response",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/risk/bus-factor?repoId={{repoId}}&modulePath={{modulePath}}&windowDays={{windowDays}}&minContributionWeight={{minContributionWeight}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "bus-factor"
+              ],
+              "query": [
+                {
+                  "key": "repoId",
+                  "value": "{{repoId}}",
+                  "disabled": false
+                },
+                {
+                  "key": "modulePath",
+                  "value": "{{modulePath}}",
+                  "disabled": true,
+                  "description": "Optional sub-path. If omitted, analyzes entire repo."
+                },
+                {
+                  "key": "windowDays",
+                  "value": "{{windowDays}}",
+                  "disabled": true,
+                  "description": "How far back to analyze (days)."
+                },
+                {
+                  "key": "minContributionWeight",
+                  "value": "{{minContributionWeight}}",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "status": "400",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        },
+        {
+          "name": "404",
+          "originalRequest": {
+            "method": "GET",
+            "description": "Calculate the bus factor for a module or repository\n\nResponses:\n- 200: Bus factor analysis.\n- 400: Response\n- 404: Response\n- 500: Response",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/risk/bus-factor?repoId={{repoId}}&modulePath={{modulePath}}&windowDays={{windowDays}}&minContributionWeight={{minContributionWeight}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "bus-factor"
+              ],
+              "query": [
+                {
+                  "key": "repoId",
+                  "value": "{{repoId}}",
+                  "disabled": false
+                },
+                {
+                  "key": "modulePath",
+                  "value": "{{modulePath}}",
+                  "disabled": true,
+                  "description": "Optional sub-path. If omitted, analyzes entire repo."
+                },
+                {
+                  "key": "windowDays",
+                  "value": "{{windowDays}}",
+                  "disabled": true,
+                  "description": "How far back to analyze (days)."
+                },
+                {
+                  "key": "minContributionWeight",
+                  "value": "{{minContributionWeight}}",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "status": "404",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        },
+        {
+          "name": "500",
+          "originalRequest": {
+            "method": "GET",
+            "description": "Calculate the bus factor for a module or repository\n\nResponses:\n- 200: Bus factor analysis.\n- 400: Response\n- 404: Response\n- 500: Response",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/risk/bus-factor?repoId={{repoId}}&modulePath={{modulePath}}&windowDays={{windowDays}}&minContributionWeight={{minContributionWeight}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "bus-factor"
+              ],
+              "query": [
+                {
+                  "key": "repoId",
+                  "value": "{{repoId}}",
+                  "disabled": false
+                },
+                {
+                  "key": "modulePath",
+                  "value": "{{modulePath}}",
+                  "disabled": true,
+                  "description": "Optional sub-path. If omitted, analyzes entire repo."
+                },
+                {
+                  "key": "windowDays",
+                  "value": "{{windowDays}}",
+                  "disabled": true,
+                  "description": "How far back to analyze (days)."
+                },
+                {
+                  "key": "minContributionWeight",
+                  "value": "{{minContributionWeight}}",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "status": "500",
+          "code": 500,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        }
+      ]
+    },
+    {
+      "name": "Find orphaned code with no active owner",
+      "request": {
+        "method": "GET",
+        "description": "Find orphaned code with no active owner\n\nResponses:\n- 200: List of orphaned files with risk scores.\n- 400: Response\n- 500: Response",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/risk/orphaned?repoId={{repoId}}&minFileAgeDays={{minFileAgeDays}}&minFileSizeLines={{minFileSizeLines}}&ownerStatus={{ownerStatus}}&sort={{sort}}&page={{page}}&size={{size}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "risk",
+            "orphaned"
+          ],
+          "query": [
+            {
+              "key": "repoId",
+              "value": "{{repoId}}",
+              "disabled": true,
+              "description": "Filter to one repo. Omit to scan entire organization."
+            },
+            {
+              "key": "minFileAgeDays",
+              "value": "{{minFileAgeDays}}",
+              "disabled": true,
+              "description": "Only include files unchanged for this many days."
+            },
+            {
+              "key": "minFileSizeLines",
+              "value": "{{minFileSizeLines}}",
+              "disabled": true,
+              "description": "Ignore trivially small files."
+            },
+            {
+              "key": "ownerStatus",
+              "value": "{{ownerStatus}}",
+              "disabled": true,
+              "description": "Filter by ownership situation."
+            },
+            {
+              "key": "sort",
+              "value": "{{sort}}",
+              "disabled": true
+            },
+            {
+              "key": "page",
+              "value": "{{page}}",
+              "disabled": true
+            },
+            {
+              "key": "size",
+              "value": "{{size}}",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "200 List of orphaned files with risk scores.",
+          "originalRequest": {
+            "method": "GET",
+            "description": "Find orphaned code with no active owner\n\nResponses:\n- 200: List of orphaned files with risk scores.\n- 400: Response\n- 500: Response",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/risk/orphaned?repoId={{repoId}}&minFileAgeDays={{minFileAgeDays}}&minFileSizeLines={{minFileSizeLines}}&ownerStatus={{ownerStatus}}&sort={{sort}}&page={{page}}&size={{size}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "orphaned"
+              ],
+              "query": [
+                {
+                  "key": "repoId",
+                  "value": "{{repoId}}",
+                  "disabled": true,
+                  "description": "Filter to one repo. Omit to scan entire organization."
+                },
+                {
+                  "key": "minFileAgeDays",
+                  "value": "{{minFileAgeDays}}",
+                  "disabled": true,
+                  "description": "Only include files unchanged for this many days."
+                },
+                {
+                  "key": "minFileSizeLines",
+                  "value": "{{minFileSizeLines}}",
+                  "disabled": true,
+                  "description": "Ignore trivially small files."
+                },
+                {
+                  "key": "ownerStatus",
+                  "value": "{{ownerStatus}}",
+                  "disabled": true,
+                  "description": "Filter by ownership situation."
+                },
+                {
+                  "key": "sort",
+                  "value": "{{sort}}",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "{{page}}",
+                  "disabled": true
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "status": "List of orphaned files with risk scores.",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        },
+        {
+          "name": "400",
+          "originalRequest": {
+            "method": "GET",
+            "description": "Find orphaned code with no active owner\n\nResponses:\n- 200: List of orphaned files with risk scores.\n- 400: Response\n- 500: Response",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/risk/orphaned?repoId={{repoId}}&minFileAgeDays={{minFileAgeDays}}&minFileSizeLines={{minFileSizeLines}}&ownerStatus={{ownerStatus}}&sort={{sort}}&page={{page}}&size={{size}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "orphaned"
+              ],
+              "query": [
+                {
+                  "key": "repoId",
+                  "value": "{{repoId}}",
+                  "disabled": true,
+                  "description": "Filter to one repo. Omit to scan entire organization."
+                },
+                {
+                  "key": "minFileAgeDays",
+                  "value": "{{minFileAgeDays}}",
+                  "disabled": true,
+                  "description": "Only include files unchanged for this many days."
+                },
+                {
+                  "key": "minFileSizeLines",
+                  "value": "{{minFileSizeLines}}",
+                  "disabled": true,
+                  "description": "Ignore trivially small files."
+                },
+                {
+                  "key": "ownerStatus",
+                  "value": "{{ownerStatus}}",
+                  "disabled": true,
+                  "description": "Filter by ownership situation."
+                },
+                {
+                  "key": "sort",
+                  "value": "{{sort}}",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "{{page}}",
+                  "disabled": true
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "status": "400",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        },
+        {
+          "name": "500",
+          "originalRequest": {
+            "method": "GET",
+            "description": "Find orphaned code with no active owner\n\nResponses:\n- 200: List of orphaned files with risk scores.\n- 400: Response\n- 500: Response",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/risk/orphaned?repoId={{repoId}}&minFileAgeDays={{minFileAgeDays}}&minFileSizeLines={{minFileSizeLines}}&ownerStatus={{ownerStatus}}&sort={{sort}}&page={{page}}&size={{size}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "orphaned"
+              ],
+              "query": [
+                {
+                  "key": "repoId",
+                  "value": "{{repoId}}",
+                  "disabled": true,
+                  "description": "Filter to one repo. Omit to scan entire organization."
+                },
+                {
+                  "key": "minFileAgeDays",
+                  "value": "{{minFileAgeDays}}",
+                  "disabled": true,
+                  "description": "Only include files unchanged for this many days."
+                },
+                {
+                  "key": "minFileSizeLines",
+                  "value": "{{minFileSizeLines}}",
+                  "disabled": true,
+                  "description": "Ignore trivially small files."
+                },
+                {
+                  "key": "ownerStatus",
+                  "value": "{{ownerStatus}}",
+                  "disabled": true,
+                  "description": "Filter by ownership situation."
+                },
+                {
+                  "key": "sort",
+                  "value": "{{sort}}",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "{{page}}",
+                  "disabled": true
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "status": "500",
+          "code": 500,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        }
+      ]
+    },
+    {
+      "name": "Get a knowledge risk scorecard for a team or organization",
+      "request": {
+        "method": "GET",
+        "description": "Get a knowledge risk scorecard for a team or organization\n\nResponses:\n- 200: Knowledge risk scorecard.\n- 400: Response\n- 404: Response\n- 500: Response",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/risk/team-scorecard?teamName={{teamName}}&repoId={{repoId}}&includeRecommendations={{includeRecommendations}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "risk",
+            "team-scorecard"
+          ],
+          "query": [
+            {
+              "key": "teamName",
+              "value": "{{teamName}}",
+              "disabled": true
+            },
+            {
+              "key": "repoId",
+              "value": "{{repoId}}",
+              "disabled": true
+            },
+            {
+              "key": "includeRecommendations",
+              "value": "{{includeRecommendations}}",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "200 Knowledge risk scorecard.",
+          "originalRequest": {
+            "method": "GET",
+            "description": "Get a knowledge risk scorecard for a team or organization\n\nResponses:\n- 200: Knowledge risk scorecard.\n- 400: Response\n- 404: Response\n- 500: Response",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/risk/team-scorecard?teamName={{teamName}}&repoId={{repoId}}&includeRecommendations={{includeRecommendations}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "team-scorecard"
+              ],
+              "query": [
+                {
+                  "key": "teamName",
+                  "value": "{{teamName}}",
+                  "disabled": true
+                },
+                {
+                  "key": "repoId",
+                  "value": "{{repoId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "includeRecommendations",
+                  "value": "{{includeRecommendations}}",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "status": "Knowledge risk scorecard.",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        },
+        {
+          "name": "400",
+          "originalRequest": {
+            "method": "GET",
+            "description": "Get a knowledge risk scorecard for a team or organization\n\nResponses:\n- 200: Knowledge risk scorecard.\n- 400: Response\n- 404: Response\n- 500: Response",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/risk/team-scorecard?teamName={{teamName}}&repoId={{repoId}}&includeRecommendations={{includeRecommendations}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "team-scorecard"
+              ],
+              "query": [
+                {
+                  "key": "teamName",
+                  "value": "{{teamName}}",
+                  "disabled": true
+                },
+                {
+                  "key": "repoId",
+                  "value": "{{repoId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "includeRecommendations",
+                  "value": "{{includeRecommendations}}",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "status": "400",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        },
+        {
+          "name": "404",
+          "originalRequest": {
+            "method": "GET",
+            "description": "Get a knowledge risk scorecard for a team or organization\n\nResponses:\n- 200: Knowledge risk scorecard.\n- 400: Response\n- 404: Response\n- 500: Response",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/risk/team-scorecard?teamName={{teamName}}&repoId={{repoId}}&includeRecommendations={{includeRecommendations}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "team-scorecard"
+              ],
+              "query": [
+                {
+                  "key": "teamName",
+                  "value": "{{teamName}}",
+                  "disabled": true
+                },
+                {
+                  "key": "repoId",
+                  "value": "{{repoId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "includeRecommendations",
+                  "value": "{{includeRecommendations}}",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "status": "404",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        },
+        {
+          "name": "500",
+          "originalRequest": {
+            "method": "GET",
+            "description": "Get a knowledge risk scorecard for a team or organization\n\nResponses:\n- 200: Knowledge risk scorecard.\n- 400: Response\n- 404: Response\n- 500: Response",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/risk/team-scorecard?teamName={{teamName}}&repoId={{repoId}}&includeRecommendations={{includeRecommendations}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "team-scorecard"
+              ],
+              "query": [
+                {
+                  "key": "teamName",
+                  "value": "{{teamName}}",
+                  "disabled": true
+                },
+                {
+                  "key": "repoId",
+                  "value": "{{repoId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "includeRecommendations",
+                  "value": "{{includeRecommendations}}",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "status": "500",
+          "code": 500,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        }
+      ]
+    },
+    {
+      "name": "Simulate the impact of an engineer leaving",
+      "request": {
+        "method": "POST",
+        "description": "Simulate the impact of an engineer leaving\n\nResponses:\n- 200: Departure impact simulation.\n- 400: Response\n- 404: Response\n- 500: Response",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/risk/simulate-departure",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "risk",
+            "simulate-departure"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [
+        {
+          "name": "200 Departure impact simulation.",
+          "originalRequest": {
+            "method": "POST",
+            "description": "Simulate the impact of an engineer leaving\n\nResponses:\n- 200: Departure impact simulation.\n- 400: Response\n- 404: Response\n- 500: Response",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/risk/simulate-departure",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "simulate-departure"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Departure impact simulation.",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        },
+        {
+          "name": "400",
+          "originalRequest": {
+            "method": "POST",
+            "description": "Simulate the impact of an engineer leaving\n\nResponses:\n- 200: Departure impact simulation.\n- 400: Response\n- 404: Response\n- 500: Response",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/risk/simulate-departure",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "simulate-departure"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "400",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        },
+        {
+          "name": "404",
+          "originalRequest": {
+            "method": "POST",
+            "description": "Simulate the impact of an engineer leaving\n\nResponses:\n- 200: Departure impact simulation.\n- 400: Response\n- 404: Response\n- 500: Response",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/risk/simulate-departure",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "simulate-departure"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "404",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        },
+        {
+          "name": "500",
+          "originalRequest": {
+            "method": "POST",
+            "description": "Simulate the impact of an engineer leaving\n\nResponses:\n- 200: Departure impact simulation.\n- 400: Response\n- 404: Response\n- 500: Response",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/risk/simulate-departure",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "risk",
+                "simulate-departure"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "500",
+          "code": 500,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": ""
+        }
+      ]
+    }
+  ]
+}
