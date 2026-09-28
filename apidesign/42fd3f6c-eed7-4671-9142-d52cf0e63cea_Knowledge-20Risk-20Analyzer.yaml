@@ -1,0 +1,770 @@
+openapi: 3.0.3
+info:
+  title: Knowledge Risk Analyzer
+  version: 1.0.0
+  description: |
+    Continuous engineering knowledge risk intelligence. Analyzes code 
+    ownership, bus factor, orphaned modules, and onboarding paths to 
+    identify where critical knowledge is dangerously concentrated. 
+    Answers the questions every CTO fears: "What happens if this 
+    engineer leaves?" and "Who would fix this at 3 AM?" Prevents 
+    silent organizational fragility from becoming catastrophic outages.
+  contact:
+    name: ForgeSphere Engineering Intelligence
+    email: eng-intel@forgesphere.example.com
+
+servers:
+  - url: https://knowledgerisk.forgesphere.lightning.com/v1
+    description: Production Server
+  - url: http://localhost:8127/v1
+    description: Local Development Server
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Risk
+    description: Analyze knowledge concentration and ownership risk.
+
+paths:
+  # ==================== 1. GET BUS FACTOR FOR A MODULE ====================
+  /risk/bus-factor:
+    get:
+      tags: [Risk]
+      summary: Calculate the bus factor for a module or repository
+      description: |
+        Returns the bus factor — the minimum number of engineers who would 
+        need to leave before this module becomes dangerously under-staffed. 
+        Factor is calculated from commit history, code ownership, review 
+        patterns, and incident response participation.
+      operationId: getBusFactor
+      parameters:
+        - name: repoId
+          in: query
+          required: true
+          schema:
+            type: string
+          example: "forgesphere/payment-app"
+        - name: modulePath
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Optional sub-path. If omitted, analyzes entire repo."
+          example: "src/main/java/com/forgesphere/payment/discount"
+        - name: windowDays
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 180
+            minimum: 30
+            maximum: 1095
+          description: "How far back to analyze (days)."
+        - name: minContributionWeight
+          in: query
+          required: false
+          schema:
+            type: number
+            default: 0.05
+            description: "Minimum % of code contribution to be considered an owner."
+      responses:
+        '200':
+          description: Bus factor analysis.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusFactorReport'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ==================== 2. FIND ORPHANED CODE ====================
+  /risk/orphaned:
+    get:
+      tags: [Risk]
+      summary: Find orphaned code with no active owner
+      description: |
+        Detects code that has no active owner — files where all past 
+        contributors have left the company, haven't committed in a long 
+        time, or transferred teams. These are the files where a future 
+        bug becomes a crisis because nobody understands them.
+      operationId: findOrphanedCode
+      parameters:
+        - name: repoId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Filter to one repo. Omit to scan entire organization."
+          example: "forgesphere/payment-app"
+        - name: minFileAgeDays
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 365
+          description: "Only include files unchanged for this many days."
+        - name: minFileSizeLines
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+          description: "Ignore trivially small files."
+        - name: ownerStatus
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [NO_OWNER, FORMER_EMPLOYEE, INACTIVE_OWNER, SINGLE_OWNER_ONLY, TRANSFERRED_TEAM]
+          description: "Filter by ownership situation."
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [CRITICALITY, LINES_OF_CODE, LAST_COMMIT_AGE, COMPLEXITY_SCORE]
+            default: CRITICALITY
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: List of orphaned files with risk scores.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OrphanedFile'
+                  totalElements:
+                    type: integer
+                    example: 342
+                  totalPages:
+                    type: integer
+                  summary:
+                    type: object
+                    properties:
+                      totalOrphanedFiles:
+                        type: integer
+                        example: 342
+                      totalOrphanedLines:
+                        type: integer
+                        example: 85420
+                      criticalOrphanedFiles:
+                        type: integer
+                        example: 12
+                      percentOfCodebase:
+                        type: number
+                        format: double
+                        example: 18.5
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ==================== 3. GET TEAM RISK SCORECARD ====================
+  /risk/team-scorecard:
+    get:
+      tags: [Risk]
+      summary: Get a knowledge risk scorecard for a team or organization
+      description: |
+        Returns a comprehensive risk scorecard — bus factor distribution, 
+        at-risk modules, top single points of failure, and recommended 
+        hiring/rotation actions. Designed for engineering leadership 
+        reviews and quarterly planning.
+      operationId: getTeamScorecard
+      parameters:
+        - name: teamName
+          in: query
+          required: false
+          schema:
+            type: string
+          example: "payments-team"
+        - name: repoId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: includeRecommendations
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Knowledge risk scorecard.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamScorecard'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ==================== 4. SIMULATE A DEPARTURE ====================
+  /risk/simulate-departure:
+    post:
+      tags: [Risk]
+      summary: Simulate the impact of an engineer leaving
+      description: |
+        The "what if" endpoint — simulate what happens to your engineering 
+        organization if a specific engineer leaves. Returns affected modules, 
+        projected new bus factors, critical gaps, and a mitigation plan. 
+        Used for retention conversations, team planning, and resignation 
+        response.
+      operationId: simulateDeparture
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [engineerId]
+              properties:
+                engineerId:
+                  type: string
+                  description: "Engineer's username or email."
+                  example: "amit.kumar@forgesphere.example.com"
+                effectiveDate:
+                  type: string
+                  format: date
+                  description: "When the departure takes effect."
+                  example: "2026-11-30"
+                scope:
+                  type: string
+                  enum: [ORGANIZATION, TEAM, REPOSITORY]
+                  default: ORGANIZATION
+                scopeId:
+                  type: string
+                  description: "Required if scope is TEAM or REPOSITORY."
+                  example: "payments-team"
+                includeHandoverPlan:
+                  type: boolean
+                  default: true
+      responses:
+        '200':
+          description: Departure impact simulation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartureSimulation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Engineering leadership or HR JWT."
+
+  schemas:
+    BusFactorReport:
+      type: object
+      required: [repoId, modulePath, busFactor, riskLevel, owners, generatedAt]
+      properties:
+        repoId:
+          type: string
+          example: "forgesphere/payment-app"
+        modulePath:
+          type: string
+          example: "src/main/java/com/forgesphere/payment/discount"
+        windowDays:
+          type: integer
+          example: 180
+        busFactor:
+          type: integer
+          description: "Minimum engineers who must leave to cause a crisis."
+          example: 1
+        riskLevel:
+          type: string
+          enum: [CRITICAL, HIGH, MEDIUM, LOW, HEALTHY]
+          example: "CRITICAL"
+        topContributorSharePercent:
+          type: number
+          format: double
+          description: "What % of code comes from the single biggest contributor."
+          example: 87.4
+        owners:
+          type: array
+          description: "Ranked list of module owners."
+          items:
+            type: object
+            required: [engineerId, name, contributionPercent, riskRole]
+            properties:
+              engineerId:
+                type: string
+                example: "amit.kumar@forgesphere.example.com"
+              name:
+                type: string
+                example: "Amit Kumar"
+              team:
+                type: string
+                example: "payments-team"
+              contributionPercent:
+                type: number
+                format: double
+                example: 87.4
+              commits:
+                type: integer
+                example: 245
+              linesAuthored:
+                type: integer
+                example: 12480
+              lastCommitAt:
+                type: string
+                format: date-time
+              reviewCount:
+                type: integer
+                description: "How many PRs they reviewed in this module."
+                example: 82
+              incidentResponseCount:
+                type: integer
+                description: "Incidents they personally handled."
+                example: 14
+              riskRole:
+                type: string
+                enum: [SOLE_OWNER, PRIMARY_OWNER, SECONDARY_OWNER, REVIEWER, OCCASIONAL]
+                example: "SOLE_OWNER"
+              employmentStatus:
+                type: string
+                enum: [ACTIVE, TRANSFERRED, ON_LEAVE, DEPARTED]
+                example: "ACTIVE"
+        criticalDependencies:
+          type: array
+          description: "Why this module is critical."
+          items:
+            type: string
+          example:
+            - "Handles ₹50Cr+ daily transaction volume"
+            - "PCI-DSS scope"
+            - "0 automated tests"
+        warnings:
+          type: array
+          items:
+            type: string
+          example:
+            - "Single point of failure: 87% code by one engineer"
+            - "No PR review by other team members in last 60 days"
+            - "3 critical bugs were fixed only by Amit in 2025"
+        generatedAt:
+          type: string
+          format: date-time
+
+    OrphanedFile:
+      type: object
+      required: [fileId, repoId, path, linesOfCode, lastCommitAt, lastCommitter, riskScore, ownerStatus]
+      properties:
+        fileId:
+          type: string
+          format: uuid
+          example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        repoId:
+          type: string
+          example: "forgesphere/payment-app"
+        path:
+          type: string
+          example: "src/main/java/com/forgesphere/legacy/LegacyDiscountCalculator.java"
+        linesOfCode:
+          type: integer
+          example: 1245
+        complexityScore:
+          type: number
+          format: double
+          description: "Cyclomatic complexity indicator."
+          example: 87.5
+        lastCommitAt:
+          type: string
+          format: date-time
+          example: "2023-06-15T11:22:00Z"
+        ageDays:
+          type: integer
+          example: 1183
+        lastCommitter:
+          type: object
+          properties:
+            engineerId:
+              type: string
+              example: "rahul.verma@forgesphere.example.com"
+            name:
+              type: string
+              example: "Rahul Verma"
+            status:
+              type: string
+              enum: [ACTIVE, TRANSFERRED, DEPARTED, UNKNOWN]
+              example: "DEPARTED"
+        pastContributors:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Priya Sharma"
+              status:
+                type: string
+                enum: [ACTIVE, TRANSFERRED, DEPARTED, UNKNOWN]
+                example: "DEPARTED"
+              linesAuthored:
+                type: integer
+                example: 820
+        ownerStatus:
+          type: string
+          enum: [NO_OWNER, FORMER_EMPLOYEE, INACTIVE_OWNER, SINGLE_OWNER_ONLY, TRANSFERRED_TEAM]
+          example: "FORMER_EMPLOYEE"
+        riskScore:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 92
+        riskFactors:
+          type: array
+          items:
+            type: string
+          example:
+            - "All original authors have left the company"
+            - "High cyclomatic complexity"
+            - "No automated tests"
+            - "Referenced by 47 other files"
+        inboundReferences:
+          type: integer
+          description: "How many other files depend on this one."
+          example: 47
+        hasTests:
+          type: boolean
+          example: false
+        testCoveragePercent:
+          type: number
+          format: double
+          example: 0.0
+        criticalityTier:
+          type: string
+          enum: [TIER_0, TIER_1, TIER_2, TIER_3]
+          description: "Business criticality classification."
+          example: "TIER_1"
+        recommendedAction:
+          type: string
+          enum: [ASSIGN_NEW_OWNER, SCHEDULE_KNOWLEDGE_TRANSFER, WRITE_DOCS, ADD_TESTS, REWRITE, ARCHIVE]
+          example: "SCHEDULE_KNOWLEDGE_TRANSFER"
+        suggestedOwnerTeam:
+          type: string
+          example: "payments-team"
+
+    TeamScorecard:
+      type: object
+      required: [teamName, overallRiskScore, summary, topRisks, generatedAt]
+      properties:
+        teamName:
+          type: string
+          example: "payments-team"
+        repoId:
+          type: string
+          example: "forgesphere/payment-app"
+        overallRiskScore:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: "Higher = more risky knowledge concentration."
+          example: 72
+        riskTier:
+          type: string
+          enum: [CRITICAL, HIGH, MEDIUM, LOW, HEALTHY]
+          example: "HIGH"
+        summary:
+          type: object
+          required: [totalModules, averageBusFactor, modulesWithBusFactorOne, engineersAsSoleOwners, orphanedFilesCount]
+          properties:
+            totalModules:
+              type: integer
+              example: 42
+            averageBusFactor:
+              type: number
+              format: double
+              example: 2.3
+            modulesWithBusFactorOne:
+              type: integer
+              example: 8
+            engineersAsSoleOwners:
+              type: integer
+              example: 3
+            orphanedFilesCount:
+              type: integer
+              example: 47
+            knowledgeMapCoveragePercent:
+              type: number
+              format: double
+              description: "% of code with clear active ownership."
+              example: 74.5
+        topRisks:
+          type: array
+          description: "Ranked list of highest knowledge risks."
+          items:
+            type: object
+            required: [riskType, description, riskScore]
+            properties:
+              riskType:
+                type: string
+                enum: [SOLE_OWNER_MODULE, ORPHANED_CODE, DEPARTED_OWNER, SINGLE_TEAM_DEPENDENCY, NO_REVIEWER_BACKUP, ZERO_TESTS_HIGH_COMPLEXITY]
+                example: "SOLE_OWNER_MODULE"
+              description:
+                type: string
+                example: "discount module owned 87% by Amit Kumar — no backup."
+              riskScore:
+                type: number
+                example: 92
+              affectedModule:
+                type: string
+                example: "src/main/java/com/forgesphere/payment/discount"
+              affectedEngineer:
+                type: string
+                example: "amit.kumar@forgesphere.example.com"
+              potentialImpact:
+                type: string
+                example: "If Amit leaves, no one can safely modify discount logic. Estimated MTTR for a bug: 8+ hours."
+        criticalModules:
+          type: array
+          description: "Modules with bus factor 1."
+          items:
+            type: object
+            properties:
+              modulePath:
+                type: string
+                example: "src/main/java/com/forgesphere/payment/discount"
+              busFactor:
+                type: integer
+                example: 1
+              soleOwner:
+                type: string
+                example: "Amit Kumar"
+              linesOfCode:
+                type: integer
+                example: 4820
+              changeFrequency:
+                type: string
+                enum: [VERY_HIGH, HIGH, MEDIUM, LOW, FROZEN]
+                example: "HIGH"
+        recommendations:
+          type: array
+          description: "Present if includeRecommendations=true."
+          items:
+            type: object
+            properties:
+              priority:
+                type: string
+                enum: [P0, P1, P2, P3]
+                example: "P0"
+              action:
+                type: string
+                example: "Assign backup owner for discount module"
+              rationale:
+                type: string
+                example: "87% code by single engineer; module changes weekly."
+              estimatedEffortHours:
+                type: integer
+                example: 40
+              suggestedOwner:
+                type: string
+                example: "priya.sharma@forgesphere.example.com"
+              impactIfNotDone:
+                type: string
+                example: "Continued fragility; departure = potential outage."
+        generatedAt:
+          type: string
+          format: date-time
+
+    DepartureSimulation:
+      type: object
+      required: [engineerId, engineerName, effectiveDate, overallImpact, affectedModules, mitigationPlan, generatedAt]
+      properties:
+        engineerId:
+          type: string
+          example: "amit.kumar@forgesphere.example.com"
+        engineerName:
+          type: string
+          example: "Amit Kumar"
+        currentTeam:
+          type: string
+          example: "payments-team"
+        effectiveDate:
+          type: string
+          format: date
+          example: "2026-11-30"
+        daysUntilEffective:
+          type: integer
+          example: 63
+        currentContributions:
+          type: object
+          properties:
+            totalCommitsLastYear:
+              type: integer
+              example: 1250
+            totalLinesAuthored:
+              type: integer
+              example: 45800
+            modulesOwned:
+              type: integer
+              example: 12
+            modulesAsSoleOwner:
+              type: integer
+              example: 4
+            prsReviewedLastYear:
+              type: integer
+              example: 342
+            incidentsHandledLastYear:
+              type: integer
+              example: 28
+        overallImpact:
+          type: object
+          required: [severity, description]
+          properties:
+            severity:
+              type: string
+              enum: [CATASTROPHIC, CRITICAL, SIGNIFICANT, MODERATE, MINIMAL]
+              example: "CRITICAL"
+            description:
+              type: string
+              example: "4 modules become ownerless. 2 are Tier-1. Estimated MTTR increase: 3.5x."
+            beforeBusFactorAverage:
+              type: number
+              format: double
+              example: 2.3
+            afterBusFactorAverage:
+              type: number
+              format: double
+              example: 1.6
+            estimatedNewOrphanedLines:
+              type: integer
+              example: 18420
+            estimatedIncidentImpactNext90Days:
+              type: string
+              example: "3-5 additional hours of MTTR if a discount-related incident occurs."
+        affectedModules:
+          type: array
+          description: "Modules that will be impacted."
+          items:
+            type: object
+            required: [modulePath, currentBusFactor, newBusFactor, impactLevel]
+            properties:
+              modulePath:
+                type: string
+                example: "src/main/java/com/forgesphere/payment/discount"
+              currentBusFactor:
+                type: integer
+                example: 1
+              newBusFactor:
+                type: integer
+                example: 0
+              impactLevel:
+                type: string
+                enum: [CATASTROPHIC, CRITICAL, HIGH, MEDIUM, LOW]
+                example: "CATASTROPHIC"
+              currentOwner:
+                type: string
+                example: "Amit Kumar"
+              suggestedNewOwner:
+                type: string
+                example: "priya.sharma@forgesphere.example.com"
+              knowledgeTransferEffortHours:
+                type: integer
+                example: 60
+        mitigationPlan:
+          type: array
+          description: "Present if includeHandoverPlan=true."
+          items:
+            type: object
+            required: [phase, action, deadline]
+            properties:
+              phase:
+                type: string
+                enum: [IMMEDIATE, SHORT_TERM, LONG_TERM]
+                example: "IMMEDIATE"
+              action:
+                type: string
+                example: "Shadow sessions: Amit + Priya pair on discount module for 2 weeks."
+              deadline:
+                type: string
+                format: date
+                example: "2026-10-15"
+              effortHours:
+                type: integer
+                example: 40
+              successCriteria:
+                type: string
+                example: "Priya independently merges 3 PRs in discount module."
+        criticalRisks:
+          type: array
+          items:
+            type: string
+          example:
+            - "discount module has 0 automated tests — new owner will fear changes."
+            - "Only Amit knows the emergency kill switch location."
+            - "Amit has admin access to 4 systems without documented procedure."
+        generatedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required: [status, message, timestamp, path]
+      properties:
+        status:
+          type: integer
+          example: 404
+        errorCode:
+          type: string
+          example: "ENGINEER_NOT_FOUND"
+        message:
+          type: string
+          example: "No engineer found with ID: amit.kumar@forgesphere.example.com."
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+          example: "/v1/risk/simulate-departure"
+
+  responses:
+    BadRequest:
+      description: "Invalid parameters or missing required fields."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: "Repository, module, or engineer not found."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: "Git history or org directory backend unavailable."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
